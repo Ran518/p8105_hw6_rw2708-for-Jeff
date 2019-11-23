@@ -115,7 +115,7 @@ plot2
 
 ## Probelm 2
 
-```{r p2}
+```{r p2_r2}
 weather_df = 
   rnoaa::meteo_pull_monitors(
     c("USW00094728"),
@@ -146,12 +146,43 @@ plot_r_squared = bootstrap_sample %>%
   labs(
     title = "Density Plot of R squared",
     x = "R squared",
-    y = "Density")
+    y = "Density") +
+  geom_vline(aes(xintercept = mean(r_squared)))
 
-plot_r_squared    
-  
+plot_r_squared 
 
+
+ci_r_squared = bootstrap_sample %>% 
+  filter(term == "tmin") %>% 
+  pull(var = r.squared) %>% 
+  quantile(c(0.025, 0.975))
 ```
 
+```{r p2_log}
+bootstrap_sample2 = bootstrap_sample %>% 
+  select(.id, term, estimate) %>% 
+  pivot_wider(
+    id_cols = .id,
+    names_from = term,
+    values_from = estimate
+  ) %>% 
+  janitor::clean_names() %>% 
+  mutate(log = log(intercept * tmin))
 
+plot_log = bootstrap_sample2 %>% 
+  ggplot(aes(x = log)) + 
+  geom_density() +
+  labs(
+    title = "Density Plot of log(beta0_hat * beta1_hat)",
+    x = "log(beta0_hat * beta1_hat)",
+    y = "Density") +
+   geom_vline(aes(xintercept = mean(log)))
+plot_log
+
+ci_log = bootstrap_sample2 %>% 
+  pull(log) %>% 
+  quantile(c(0.025, 0.975))
+
+ci_log 
+```
 
